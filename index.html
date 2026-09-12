@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lobdhi Visuals — Interactive Physics Simulations</title>
+<meta name="description" content="Lobdhi Visuals — আদি থেকে শেষ. Interactive HSC vector simulations you can drag, rotate and measure.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&family=Hind+Siliguri:wght@500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- background ambient vector field -->
+<canvas id="bg-field"></canvas>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <img src="assets/Lobdhi.jpg" alt="Lobdhi logo" class="brand-logo">
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#chapters" class="nav-link">Chapters</a>
+      <a href="#about" class="nav-link">About</a>
+      <div class="nav-socials">
+        <a href="https://www.facebook.com/share/18v8TKB6zF/" class="social-btn" aria-label="Facebook" title="Facebook (placeholder)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.16 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.91h-2.34V22c4.78-.78 8.44-4.94 8.44-9.94Z"/></svg>
+        </a>
+        <a href="https://youtube.com/@lobdhi?si=NmHmUpI02VWagZZj" class="social-btn" aria-label="YouTube" title="YouTube (placeholder)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.44 3.5 12 3.5 12 3.5s-7.44 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.56 20.5 12 20.5 12 20.5s7.44 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.6 15.6V8.4l6.42 3.6-6.42 3.6Z"/></svg>
+        </a>
+      </div>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="hero-inner">
+    <div class="hero-badge">HSC PHYSICS &middot; INTERACTIVE LAB</div>
+    <img src="assets/Lobdhi.jpg" alt="Lobdhi" class="hero-logo">
+    <div class="hero-tagline">আদি থেকে শেষ</div>
+    <h1 class="hero-title">See the physics.<br><span class="accent">Not just the formula.</span></h1>
+    <p class="hero-sub">Lobdhi Visuals turns HSC vector chapters into simulations you can drag,
+      rotate and measure. It is built for the students who want to feel the physics, not just the answer.</p>
+    <a href="#chapters" class="btn-primary" id="startBtn">
+      Start
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </div>
+  <div class="scroll-cue" aria-hidden="true"><span></span></div>
+</section>
+
+<!-- ================= CHAPTERS ================= -->
+<section class="chapters" id="chapters" hidden>
+  <div class="section-head">
+    <h2>Pick a chapter to explore</h2>
+    <p>More chapters are on the way.</p>
+  </div>
+
+  <div class="chapter-grid">
+    <button class="chapter-card" id="chapterVector" data-chapter="vector">
+      <div class="chapter-card-glow"></div>
+      <div class="chapter-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <div class="chapter-card-body">
+        <span class="chapter-index">CH.01</span>
+        <h3>ভেক্টর</h3>
+        <span class="chapter-cta">Open simulations
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </div>
+    </button>
+
+    <div class="chapter-card chapter-card--soon" aria-disabled="true">
+      <div class="chapter-card-body">
+        <span class="chapter-index">CH.02</span>
+        <h3>গতিবিদ্যা</h3>
+        <p>শীঘ্রই আসছে</p>
+      </div>
+    </div>
+
+    <div class="chapter-card chapter-card--soon" aria-disabled="true">
+      <div class="chapter-card-body">
+        <span class="chapter-index">CH.03</span>
+        <h3>নিউটনীয় বলবিদ্যা</h3>
+        <p>শীঘ্রই আসছে</p>
+      </div>
+    </div>
+
+    <div class="chapter-card chapter-card--soon" aria-disabled="true">
+      <div class="chapter-card-body">
+        <span class="chapter-index">CH.04</span>
+        <h3>কাজ, শক্তি ও ক্ষমতা</h3>
+        <p>শীঘ্রই আসছে</p>
+      </div>
+    </div>
+
+    <div class="chapter-card chapter-card--soon" aria-disabled="true">
+      <div class="chapter-card-body">
+        <span class="chapter-index">CH.05</span>
+        <h3>মহাকর্ষ ও অভিকর্ষ</h3>
+        <p>শীঘ্রই আসছে</p>
+      </div>
+    </div>
+
+    <div class="chapter-card chapter-card--soon" aria-disabled="true">
+      <div class="chapter-card-body">
+        <span class="chapter-index">CH.06</span>
+        <h3>পর্যায়বৃত্ত গতি</h3>
+        <p>শীঘ্রই আসছে</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= SIMULATION LAB ================= -->
+<section class="lab" id="lab" hidden>
+  <div class="lab-top">
+    <button class="lab-back" id="labBack">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      অধ্যায়সমূহ
+    </button>
+    <div class="lab-title">
+      <span class="eyebrow">অধ্যায় ০১ · ভেক্টর</span>
+      <h2 id="labTopicTitle">ভেক্টর পরিচিতি</h2>
+    </div>
+  </div>
+
+  <div class="lab-body">
+    <!-- topic list -->
+    <nav class="topic-list" id="topicList" aria-label="Vector topics"></nav>
+
+    <!-- workspace -->
+    <div class="workspace">
+      <div class="workspace-canvas-wrap">
+        <canvas id="simCanvas" width="640" height="520"></canvas>
+        <div class="canvas-legend" id="canvasLegend"></div>
+      </div>
+
+      <div class="workspace-panel">
+        <div class="panel-block controls-block">
+          <h4>Controls</h4>
+          <div id="controlsHost" class="controls-host"></div>
+        </div>
+
+        <div class="panel-block formula-block">
+          <h4>Formula</h4>
+          <div id="formulaHost" class="formula-host"></div>
+        </div>
+
+        <div class="panel-block readout-block">
+          <h4>Values</h4>
+          <div id="readoutHost" class="readout-host"></div>
+        </div>
+
+        <div class="panel-block note-block">
+          <h4>Student note</h4>
+          <p id="noteHost" class="note-host"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT / FOOTER ================= -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <img src="assets/Lobdhi.jpg" alt="Lobdhi" class="about-logo">
+    <p>Lobdhi Visuals is built for HSC students in Bangladesh — turning textbook vector diagrams
+      into simulations you can actually play with. No app, no login, just open and drag.</p>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span>© <span id="year"></span> Lobdhi Visuals</span>
+    <div class="footer-socials">
+      <a href="https://www.facebook.com/share/18v8TKB6zF/" title="Facebook" target="_blank">Facebook</a>
+      <span class="dot">·</span>
+      <a href="https://youtube.com/@lobdhi?si=NmHmUpI02VWagZZj" title="YouTube" target="_blank">YouTube</a>
+    </div>
+  </div>
+</footer>
+
+<script src="js/core/foundation.js"></script>
+<script src="js/core/site-ui.js"></script>
+<script src="js/core/canvas.js"></script>
+<script src="js/chapters/vector/index.js"></script>
+<script src="js/chapters/vector/01-vector-basics.js"></script>
+<script src="js/chapters/vector/02-components.js"></script>
+<script src="js/chapters/vector/03-resultant.js"></script>
+<script src="js/chapters/vector/04-triangle-law.js"></script>
+<script src="js/chapters/vector/05-parallelogram-law.js"></script>
+<script src="js/chapters/vector/06-vector-subtraction.js"></script>
+<script src="js/chapters/vector/07-unit-vector.js"></script>
+<script src="js/chapters/vector/08-riverboat.js"></script>
+<script src="js/chapters/vector/09-dot-product.js"></script>
+<script src="js/chapters/vector/10-cross-product.js"></script>
+<script src="js/chapters/vector/11-rain-relative-velocity.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+LOBDHI VISUALS — MODULAR CODE STRUCTURE
+
+IMPORTANT
+- Current design, layout, formulas and simulations are preserved.
+- Existing style.css is kept as-is.
+- JavaScript is divided into smaller files for easier management.
+- River Speed and Boat Speed max are 100 m/s as requested.
+- Future chapter placeholder files are NOT loaded yet, so they do not change current behavior.
+- JS files were syntax-checked after splitting.
+
+CURRENT STRUCTURE
+
+index.html
+style.css
+js/
+  core/
+    foundation.js
+    site-ui.js
+    canvas.js
+  chapters/
+    vector/
+      index.js
+      01-vector-basics.js
+      02-components.js
+      03-resultant.js
+      04-triangle-law.js
+      05-parallelogram-law.js
+      06-vector-subtraction.js
+      07-unit-vector.js
+      08-riverboat.js
+      09-dot-product.js
+      10-cross-product.js
+      11-rain-relative-velocity.js
+    kinematics/
+      kinematics.js
+    newtonian-mechanics/
+      newtonian-mechanics.js
+    work-energy-power/
+      work-energy-power.js
+    gravitation/
+      gravitation.js
+    periodic-motion/
+      periodic-motion.js
+  app.js
+
+WHAT GOES WHERE
+
+1) js/core/foundation.js
+- $, $$
+- toRad, toDeg, norm360, fmt
+- shared colors COL
+- shared Lobdhi namespace / chapter registry
+
+2) js/core/site-ui.js
+- current year
+- navbar
+- mobile menu
+- ambient background vector animation
+
+3) js/core/canvas.js
+- fitCanvas
+- worldToCanvas
+- drawGrid
+- drawArrow
+- drawLabel
+- drawAngleArc
+- drawAngleArcAt
+
+4) js/chapters/vector/index.js
+- Creates the Vector chapter simulation registry.
+- Load this BEFORE every individual Vector simulation file.
+
+5) js/chapters/vector/01...11 files
+- Each file contains only ONE Vector simulation.
+- 08-riverboat.js contains the complete River Boat simulation including its Run/Pause/Reset, animation speed, special controls and animation loop.
+- This keeps River Boat-specific code out of app.js.
+
+6) js/app.js
+- Generic simulation lab engine only.
+- Builds topic list.
+- Runs the selected simulation.
+- Generic controls for simulations that do not provide custom controls.
+- Generic topic switching.
+- Generic canvas drag handling.
+- Start button / current Vector chapter opening logic.
+
+ADDING A NEW VECTOR SIMULATION
+1. Create a new file inside js/chapters/vector/, e.g. 12-new-vector-sim.js
+2. Put only that simulation in the new file.
+3. Use the same L.chapters.vector.push(...) pattern.
+4. Add its <script> tag in index.html AFTER vector/index.js and BEFORE js/app.js.
+
+ADDING A NEW CHAPTER
+Example: Kinematics
+1. Put only Kinematics simulation files inside js/chapters/kinematics/.
+2. Keep Vector files inside js/chapters/vector/ only.
+3. When Kinematics is ready, create its chapter registry and simulation files in that folder.
+4. Then load those files and connect the Kinematics chapter card. Until then, the placeholder file changes nothing.
+
+CURRENT SCRIPT LOAD ORDER IN index.html
+1. js/core/foundation.js
+2. js/core/site-ui.js
+3. js/core/canvas.js
+4. js/chapters/vector/index.js
+5. Vector simulation 01 to 11
+6. js/app.js
+
+IMPORTANT
+- Do not load app.js before the chapter simulation files.
+- Keep the numbered Vector simulation script tags in the same order if you want the left-side topic list order to remain exactly the same.
