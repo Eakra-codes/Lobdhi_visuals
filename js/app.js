@@ -108,18 +108,119 @@
       canvas.style.cursor = "default";
     }
 
-    formulaHost.innerHTML = topic.formula(values, computed);
-    readoutHost.innerHTML = topic
-      .readout(values, computed)
+      formulaHost.innerHTML = topic.formula(values, computed);
+
+    const readouts = topic.readout(values, computed);
+
+    readoutHost.innerHTML = readouts
+      .map((r, index) => {
+
+        const control = topic.controls[index];
+
+        if (control) {
+          return `
+          <div class="readout-item">
+            <div class="r-label">${r.label}</div>
+
+            <input 
+              class="value-input"
+              type="number"
+              value="${control.value}"
+              min="${control.min}"
+              max="${control.max}"
+              step="${control.step}"
+              data-key="${control.key}"
+            >
+
+          </div>`;
+        }
+
+        return `
+        <div class="readout-item">
+          <div class="r-label">${r.label}</div>
+
+          <div class="r-value${r.hl ? " hl" : ""}">
+            ${r.value}
+          </div>
+
+        </div>`;
+      })
+      .join("");
+
+
+    $$(".value-input", readoutHost).forEach((input) => {
+
+      input.addEventListener("change", () => {
+
+        const key = input.dataset.key;
+        const value = Number(input.value);
+
+        setControl(topic, key, value);
+
+        runSim(topic);
+
+      });
+
+    });
+
+
+    noteHost.textContent = topic.note;
+
+
+    legendHost.innerHTML = topic.legend
       .map(
-        (r) =>
-          `<div class="readout-item"><div class="r-label">${r.label}</div><div class="r-value${r.hl ? " hl" : ""}">${r.value}</div></div>`
+        (l) =>
+          `<div class="legend-item">
+            <span class="legend-swatch" style="background:${l.color}"></span>
+            ${l.label}
+          </div>`
       )
       .join("");
-    noteHost.textContent = topic.note;
-    legendHost.innerHTML = topic.legend
-      .map((l) => `<div class="legend-item"><span class="legend-swatch" style="background:${l.color}"></span>${l.label}</div>`)
-      .join("");
+
+
+$$(".value-input", readoutHost).forEach((input) => {
+
+  input.addEventListener("change", () => {
+
+    const key = input.dataset.key;
+    const val = Number(input.value);
+
+    setControl(topic, key, val);
+
+    runSim(topic);
+
+  });
+
+});
+
+
+noteHost.textContent = topic.note;
+
+legendHost.innerHTML = topic.legend
+  .map(
+    (l) =>
+      `<div class="legend-item">
+        <span class="legend-swatch" style="background:${l.color}"></span>
+        ${l.label}
+      </div>`
+  )
+  .join("");
+
+
+$$(".value-input", readoutHost).forEach((input)=>{
+
+  input.addEventListener("change",()=>{
+
+    const key = input.dataset.key;
+    const val = parseFloat(input.value);
+
+    setControl(topic,key,val);
+
+    runSim(topic);
+
+  });
+
+});
   }
 
   function switchTopic(index) {
