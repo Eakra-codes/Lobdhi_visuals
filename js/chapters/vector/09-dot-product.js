@@ -84,9 +84,9 @@
       },
       readout(v, c) {
         return [
-          { label: "A", value: fmt(v.A) },
-          { label: "B", value: fmt(v.B) },
-          { label: "θ", value: fmt(v.theta, 1) + "°" },
+          { label: "A", value: fmt(v.A), key: "A" },
+          { label: "B", value: fmt(v.B), key: "B" },
+          { label: "θ", value: fmt(v.theta, 1) + "°", key: "theta" },
           { label: "B cosθ", value: fmt(c.proj), hl: true },
           { label: "A·B", value: fmt(c.dot), hl: true },
         ];

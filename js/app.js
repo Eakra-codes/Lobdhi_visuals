@@ -1,6 +1,9 @@
 /* =========================================================
    LOBDHI VISUALS — APP / LAB ENGINE
    Shared lab navigation, controls and simulation runner.
+
+   Chapter-aware: any chapter registered in L.chapters and
+   listed in CHAPTERS below gets its own card + topic list.
    ========================================================= */
 (() => {
   "use strict";
@@ -10,7 +13,16 @@
     $, $$, fmt, fitCanvas, worldToCanvas, drawGrid
   } = L;
 
-  const topics = L.chapters.vector;
+  /* =========================================================
+     CHAPTER REGISTRY
+     key     — the name used in L.chapters.<key>
+     cardId  — the id of the chapter card in index.html
+     eyebrow — small heading shown above the topic title
+     ========================================================= */
+  const CHAPTERS = [
+    { key: "vector",     cardId: "chapterVector",     eyebrow: "অধ্যায় ০১ · ভেক্টর" },
+    { key: "kinematics", cardId: "chapterKinematics", eyebrow: "অধ্যায় ০২ · গতিবিদ্যা" },
+  ];
 
   /* =========================================================
      LAB WIRING
@@ -24,18 +36,36 @@
   const noteHost = $("#noteHost");
   const legendHost = $("#canvasLegend");
   const labTopicTitle = $("#labTopicTitle");
+  const labChapterName = $("#labChapterName");
   const workspace = $(".workspace");
 
+  let topics = [];
   let currentIndex = 0;
 
-  // build topic nav once
-  topics.forEach((t, i) => {
-    const btn = document.createElement("button");
-    btn.className = "topic-btn";
-    btn.innerHTML = `<span class="num">${String(i + 1).padStart(2, "0")}</span><span class="label">${t.label}</span>`;
-    btn.addEventListener("click", () => switchTopic(i));
-    topicListEl.appendChild(btn);
-  });
+  /* number of decimals a control's value should be shown with */
+  function decimalsFor(cfg) {
+    return cfg.step < 1 ? 2 : (Number.isInteger(cfg.step) ? 0 : 1);
+  }
+
+  function currentTopic() {
+    return topics[currentIndex] || null;
+  }
+
+  function leaveCurrentTopic() {
+    const topic = currentTopic();
+    if (topic && typeof topic.onLeave === "function") topic.onLeave();
+  }
+
+  function buildTopicNav() {
+    topicListEl.innerHTML = "";
+    topics.forEach((t, i) => {
+      const btn = document.createElement("button");
+      btn.className = "topic-btn";
+      btn.innerHTML = `<span class="num">${String(i + 1).padStart(2, "0")}</span><span class="label">${t.label}</span>`;
+      btn.addEventListener("click", () => switchTopic(i));
+      topicListEl.appendChild(btn);
+    });
+  }
 
   function buildControls(topic) {
     controlsHost.innerHTML = "";
@@ -56,7 +86,7 @@
       const row = document.createElement("div");
       row.className = "control-row";
       row.innerHTML = `
-        <label>${cfg.label} <span class="val">${fmt(cfg.value, cfg.step < 1 ? 2 : (Number.isInteger(cfg.step) ? 0 : 1))}${cfg.unit}</span></label>
+        <label>${cfg.label} <span class="val">${fmt(cfg.value, decimalsFor(cfg))}${cfg.unit}</span></label>
         <input type="range" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}" value="${cfg.value}">
       `;
       const input = row.querySelector("input");
@@ -65,7 +95,7 @@
       cfg._valSpan = valSpan;
       input.addEventListener("input", () => {
         cfg.value = parseFloat(input.value);
-        valSpan.textContent = `${fmt(cfg.value, cfg.step < 1 ? 2 : (Number.isInteger(cfg.step) ? 0 : 1))}${cfg.unit}`;
+        valSpan.textContent = `${fmt(cfg.value, decimalsFor(cfg))}${cfg.unit}`;
         runSim(topic);
       });
       controlsHost.appendChild(row);
@@ -108,124 +138,69 @@
       canvas.style.cursor = "default";
     }
 
-      formulaHost.innerHTML = topic.formula(values, computed);
+    formulaHost.innerHTML = topic.formula(values, computed);
 
-    const readouts = topic.readout(values, computed);
-
-    readoutHost.innerHTML = readouts
-      .map((r, index) => {
-
-        const control = topic.controls[index];
+    /* -------------------------------------------------------
+       READOUT PANEL
+       A readout item becomes an editable number box only when
+       it carries a `key` that matches one of topic.controls.
+       Derived values (R, θR, A·B …) stay read-only.
+       ------------------------------------------------------- */
+    readoutHost.innerHTML = topic
+      .readout(values, computed)
+      .map((r) => {
+        const control = r.key ? topic.controls.find((c) => c.key === r.key) : null;
 
         if (control) {
           return `
-          <div class="readout-item">
-            <div class="r-label">${r.label}</div>
-
-            <input 
-              class="value-input"
-              type="number"
-              value="${control.value}"
-              min="${control.min}"
-              max="${control.max}"
-              step="${control.step}"
-              data-key="${control.key}"
-            >
-
-          </div>`;
+            <div class="readout-item">
+              <div class="r-label">${r.label}</div>
+              <input
+                class="value-input"
+                type="number"
+                value="${control.value}"
+                min="${control.min}"
+                max="${control.max}"
+                step="${control.step}"
+                data-key="${control.key}"
+              >
+            </div>`;
         }
 
         return `
-        <div class="readout-item">
-          <div class="r-label">${r.label}</div>
-
-          <div class="r-value${r.hl ? " hl" : ""}">
-            ${r.value}
-          </div>
-
-        </div>`;
+          <div class="readout-item">
+            <div class="r-label">${r.label}</div>
+            <div class="r-value${r.hl ? " hl" : ""}">${r.value}</div>
+          </div>`;
       })
       .join("");
 
-
     $$(".value-input", readoutHost).forEach((input) => {
-
       input.addEventListener("change", () => {
-
-        const key = input.dataset.key;
-        const value = Number(input.value);
-
-        setControl(topic, key, value);
-
+        const val = parseFloat(input.value);
+        if (Number.isNaN(val)) {
+          runSim(topic);   // blank / invalid entry: put the old value back
+          return;
+        }
+        setControl(topic, input.dataset.key, val);
         runSim(topic);
-
       });
-
     });
 
-
     noteHost.textContent = topic.note;
-
 
     legendHost.innerHTML = topic.legend
       .map(
         (l) =>
-          `<div class="legend-item">
-            <span class="legend-swatch" style="background:${l.color}"></span>
-            ${l.label}
-          </div>`
+          `<div class="legend-item"><span class="legend-swatch" style="background:${l.color}"></span>${l.label}</div>`
       )
       .join("");
-
-
-$$(".value-input", readoutHost).forEach((input) => {
-
-  input.addEventListener("change", () => {
-
-    const key = input.dataset.key;
-    const val = Number(input.value);
-
-    setControl(topic, key, val);
-
-    runSim(topic);
-
-  });
-
-});
-
-
-noteHost.textContent = topic.note;
-
-legendHost.innerHTML = topic.legend
-  .map(
-    (l) =>
-      `<div class="legend-item">
-        <span class="legend-swatch" style="background:${l.color}"></span>
-        ${l.label}
-      </div>`
-  )
-  .join("");
-
-
-$$(".value-input", readoutHost).forEach((input)=>{
-
-  input.addEventListener("change",()=>{
-
-    const key = input.dataset.key;
-    const val = parseFloat(input.value);
-
-    setControl(topic,key,val);
-
-    runSim(topic);
-
-  });
-
-});
   }
 
   function switchTopic(index) {
-    const previousTopic = topics[currentIndex];
+    const previousTopic = currentTopic();
     const topic = topics[index];
+    if (!topic) return;
     if (previousTopic && previousTopic !== topic && typeof previousTopic.onLeave === "function") {
       previousTopic.onLeave();
     }
@@ -245,18 +220,39 @@ $$(".value-input", readoutHost).forEach((input)=>{
     }, 180);
   }
 
-  function openLab() {
+  /* =========================================================
+     CHAPTER OPENING
+     ========================================================= */
+  function openChapter(chapter) {
+    const list = L.chapters[chapter.key];
+    if (!list || !list.length) return;
+
+    leaveCurrentTopic();
+    topics = list;
+    currentIndex = 0;
+    if (labChapterName) labChapterName.textContent = chapter.eyebrow;
+    buildTopicNav();
+
     lab.hidden = false;
-    switchTopic(currentIndex);
+    switchTopic(0);
     requestAnimationFrame(() => {
       lab.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
 
-  $("#chapterVector").addEventListener("click", openLab);
+  // Wire up every chapter that actually has simulations loaded.
+  CHAPTERS.forEach((chapter) => {
+    const card = document.getElementById(chapter.cardId);
+    if (!card) return;
+    const list = L.chapters[chapter.key];
+    if (!list || !list.length) return;   // still a placeholder chapter
+    card.classList.remove("chapter-card--soon");
+    card.removeAttribute("aria-disabled");
+    card.addEventListener("click", () => openChapter(chapter));
+  });
+
   $("#labBack").addEventListener("click", () => {
-    const currentTopic = topics[currentIndex];
-    if (currentTopic && typeof currentTopic.onLeave === "function") currentTopic.onLeave();
+    leaveCurrentTopic();
     lab.hidden = true;
     $("#chapters").scrollIntoView({ behavior: "smooth", block: "start" });
   });
@@ -274,7 +270,7 @@ $$(".value-input", readoutHost).forEach((input)=>{
     if (cfg._input) cfg._input.value = x;
     if (cfg._numberInput) cfg._numberInput.value = x;
     if (cfg._valSpan) {
-      cfg._valSpan.textContent = `${fmt(x, cfg.step < 1 ? 2 : (Number.isInteger(cfg.step) ? 0 : 1))}${cfg.unit}`;
+      cfg._valSpan.textContent = `${fmt(x, decimalsFor(cfg))}${cfg.unit}`;
     }
   }
 
@@ -297,8 +293,8 @@ $$(".value-input", readoutHost).forEach((input)=>{
   let activeHandleIndex = null;
 
   canvas.addEventListener("pointerdown", (e) => {
-    const topic = topics[currentIndex];
-    if (lab.hidden || !topic.handles) return;
+    const topic = currentTopic();
+    if (lab.hidden || !topic || !topic.handles) return;
     const { wx, wy } = pointerWorld(e);
     const scale = window.__lobdhiScale || 28;
     const pickR = 20 / scale;
@@ -318,7 +314,8 @@ $$(".value-input", readoutHost).forEach((input)=>{
 
   canvas.addEventListener("pointermove", (e) => {
     if (activeHandleIndex === null) return;
-    const topic = topics[currentIndex];
+    const topic = currentTopic();
+    if (!topic) return;
     const { wx, wy } = pointerWorld(e);
     const hs = currentHandles(topic);
     const h = hs[activeHandleIndex];
@@ -331,8 +328,8 @@ $$(".value-input", readoutHost).forEach((input)=>{
   ["pointerup", "pointercancel"].forEach((ev) =>
     canvas.addEventListener(ev, () => {
       activeHandleIndex = null;
-      const topic = topics[currentIndex];
-      canvas.style.cursor = topic.handles ? "grab" : "default";
+      const topic = currentTopic();
+      canvas.style.cursor = topic && topic.handles ? "grab" : "default";
     })
   );
   canvas.style.touchAction = "none";
@@ -363,7 +360,8 @@ $$(".value-input", readoutHost).forEach((input)=>{
   });
 
   window.addEventListener("resize", () => {
-    if (!lab.hidden) runSim(topics[currentIndex]);
+    const topic = currentTopic();
+    if (!lab.hidden && topic) runSim(topic);
   });
 
 })();

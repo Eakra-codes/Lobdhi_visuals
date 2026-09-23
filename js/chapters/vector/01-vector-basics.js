@@ -40,8 +40,8 @@
       },
       readout(v, c) {
         return [
-          { label: "r (magnitude)", value: fmt(v.r) },
-          { label: "θ (angle)", value: fmt(v.theta, 1) + "°" },
+          { label: "r (magnitude)", value: fmt(v.r), key: "r" },
+          { label: "θ (angle)", value: fmt(v.theta, 1) + "°", key: "theta" },
           { label: "Vx", value: fmt(c.x), hl: true },
           { label: "Vy", value: fmt(c.y), hl: true },
         ];

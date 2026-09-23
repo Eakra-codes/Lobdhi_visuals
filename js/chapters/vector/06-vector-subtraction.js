@@ -58,8 +58,10 @@
       },
       readout(v, c) {
         return [
-          { label: "A, θA", value: `${fmt(v.A)}, ${fmt(v.thetaA, 1)}°` },
-          { label: "B, θB", value: `${fmt(v.B)}, ${fmt(v.thetaB, 1)}°` },
+          { label: "A", value: fmt(v.A), key: "A" },
+          { label: "θA", value: fmt(v.thetaA, 1) + "°", key: "thetaA" },
+          { label: "B", value: fmt(v.B), key: "B" },
+          { label: "θB", value: fmt(v.thetaB, 1) + "°", key: "thetaB" },
           { label: "D (difference)", value: fmt(c.D), hl: true },
           { label: "θD (direction)", value: fmt(norm360(c.thetaD), 1) + "°", hl: true },
         ];

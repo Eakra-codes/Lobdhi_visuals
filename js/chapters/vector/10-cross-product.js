@@ -103,9 +103,9 @@
       },
       readout(v, c) {
         return [
-          { label: "A", value: fmt(v.A) },
-          { label: "B", value: fmt(v.B) },
-          { label: "θ", value: fmt(v.theta, 1) + "°" },
+          { label: "A", value: fmt(v.A), key: "A" },
+          { label: "B", value: fmt(v.B), key: "B" },
+          { label: "θ", value: fmt(v.theta, 1) + "°", key: "theta" },
           { label: "|A×B|", value: fmt(c.cross), hl: true },
           { label: "দিক", value: v.theta % 180 === 0 ? "—" : "⊙ বাইরে" },
         ];

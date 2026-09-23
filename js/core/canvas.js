@@ -170,4 +170,183 @@
     }
     ctx.restore();
   };
+  /* =========================================================
+     drawPlot — 2D graph helper (axes, grid, curves, shading)
+
+     box : { x, y, w, h }   plotting rectangle in canvas pixels
+     cfg : {
+       title, xLabel, yLabel,
+       xMin, xMax, yMin, yMax,        // yMin/yMax auto from series if omitted
+       xTicks = 5, yTicks = 4,
+       series: [ { pts: [{x,y}...], color, lw, dashed,
+                   fillTo: <number|null>, fillColor,
+                   clipXMax: <number|null> } ],
+       markers: [ { x, y, color, label } ]
+     }
+
+     Returns { px, py } so callers can place extra things on the plot.
+     ========================================================= */
+  L.drawPlot = function drawPlot(ctx, box, cfg) {
+    const { x, y, w, h } = box;
+    const fmt = L.fmt;
+    const series = cfg.series || [];
+
+    const xMin = cfg.xMin ?? 0;
+    const xMax = cfg.xMax ?? 1;
+
+    let yMin = cfg.yMin;
+    let yMax = cfg.yMax;
+    if (yMin === undefined || yMax === undefined) {
+      let lo = 0;
+      let hi = 0;
+      series.forEach((s) =>
+        (s.pts || []).forEach((p) => {
+          if (p.y < lo) lo = p.y;
+          if (p.y > hi) hi = p.y;
+        })
+      );
+      if (hi - lo < 1e-9) { hi = lo + 1; }
+      const pad = (hi - lo) * 0.12;
+      if (yMin === undefined) yMin = lo - pad;
+      if (yMax === undefined) yMax = hi + pad;
+    }
+
+    const spanX = xMax - xMin || 1;
+    const spanY = yMax - yMin || 1;
+    const px = (vx) => x + ((vx - xMin) / spanX) * w;
+    const py = (vy) => y + h - ((vy - yMin) / spanY) * h;
+
+    ctx.save();
+
+    // panel background
+    ctx.fillStyle = "rgba(255,255,255,0.025)";
+    ctx.fillRect(x, y, w, h);
+
+    // grid
+    const xTicks = cfg.xTicks ?? 5;
+    const yTicks = cfg.yTicks ?? 4;
+    ctx.strokeStyle = "rgba(255,255,255,0.07)";
+    ctx.lineWidth = 1;
+    ctx.font = "10.5px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+
+    for (let i = 0; i <= xTicks; i++) {
+      const vx = xMin + (spanX * i) / xTicks;
+      const cx = px(vx);
+      ctx.beginPath();
+      ctx.moveTo(cx, y);
+      ctx.lineTo(cx, y + h);
+      ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.fillText(fmt(vx, spanX >= 5 ? 0 : 1), cx, y + h + 13);
+    }
+    for (let i = 0; i <= yTicks; i++) {
+      const vy = yMin + (spanY * i) / yTicks;
+      const cy = py(vy);
+      ctx.beginPath();
+      ctx.moveTo(x, cy);
+      ctx.lineTo(x + w, cy);
+      ctx.stroke();
+      ctx.textAlign = "right";
+      ctx.fillText(fmt(vy, spanY >= 20 ? 0 : 1), x - 7, cy + 3.5);
+    }
+
+    // zero line
+    if (yMin < 0 && yMax > 0) {
+      ctx.strokeStyle = "rgba(255,255,255,0.32)";
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(x, py(0));
+      ctx.lineTo(x + w, py(0));
+      ctx.stroke();
+    }
+
+    // frame
+    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(x, y, w, h);
+
+    // shaded fills first, so curves stay on top
+    series.forEach((s) => {
+      if (s.fillTo === undefined || s.fillTo === null) return;
+      const pts = (s.pts || []).filter(
+        (p) => s.clipXMax === undefined || s.clipXMax === null || p.x <= s.clipXMax
+      );
+      if (pts.length < 2) return;
+      ctx.beginPath();
+      ctx.moveTo(px(pts[0].x), py(s.fillTo));
+      pts.forEach((p) => ctx.lineTo(px(p.x), py(p.y)));
+      ctx.lineTo(px(pts[pts.length - 1].x), py(s.fillTo));
+      ctx.closePath();
+      ctx.fillStyle = s.fillColor || "rgba(255,212,0,0.18)";
+      ctx.fill();
+    });
+
+    // curves
+    series.forEach((s) => {
+      const pts = s.pts || [];
+      if (pts.length < 2) return;
+      ctx.save();
+      ctx.strokeStyle = s.color || "#ffd400";
+      ctx.lineWidth = s.lw || 2.4;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      if (s.dashed) ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      pts.forEach((p, i) => {
+        const cx = px(p.x);
+        const cy = py(p.y);
+        if (i === 0) ctx.moveTo(cx, cy);
+        else ctx.lineTo(cx, cy);
+      });
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // markers
+    (cfg.markers || []).forEach((m) => {
+      const cx = px(m.x);
+      const cy = py(m.y);
+      ctx.beginPath();
+      ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = m.color || "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = "rgba(0,0,0,0.5)";
+      ctx.stroke();
+      if (m.label) {
+        ctx.fillStyle = m.color || "#ffffff";
+        ctx.font = "600 11.5px 'JetBrains Mono', monospace";
+        ctx.textAlign = "left";
+        ctx.fillText(m.label, cx + 9, cy - 7);
+      }
+    });
+
+    // title and axis labels
+    if (cfg.title) {
+      ctx.fillStyle = "rgba(255,255,255,0.82)";
+      ctx.font = "600 12.5px 'Hind Siliguri', sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(cfg.title, x, y - 7);
+    }
+    if (cfg.xLabel) {
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.textAlign = "right";
+      ctx.fillText(cfg.xLabel, x + w, y + h + 25);
+    }
+    if (cfg.yLabel) {
+      ctx.save();
+      ctx.translate(x - 42, y + h / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(cfg.yLabel, 0, 0);
+      ctx.restore();
+    }
+
+    ctx.restore();
+    return { px, py };
+  };
 })();

@@ -280,9 +280,9 @@
         const s = this._state;
         const out = [
           { label: "Time", value: fmt(s.elapsed, 2) + " s" },
-          { label: "River vᵣ→ₑ", value: fmt(v.currentSpeed, 1) + " m/s" },
-          { label: "Boat vᵦ→ᵣ", value: fmt(v.boatSpeed, 1) + " m/s" },
-          { label: "Aim θ", value: fmt(v.aimAngle, 0) + "°" },
+          { label: "River vᵣ→ₑ", value: fmt(v.currentSpeed, 1) + " m/s", key: "currentSpeed" },
+          { label: "Boat vᵦ→ᵣ", value: fmt(v.boatSpeed, 1) + " m/s", key: "boatSpeed" },
+          { label: "Aim θ", value: fmt(v.aimAngle, 0) + "°", key: "aimAngle" },
         ];
         if (s.showResultant) {
           const d = c.directionFromNorth;

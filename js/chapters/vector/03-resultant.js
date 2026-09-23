@@ -59,9 +59,9 @@
       },
       readout(v, c) {
         return [
-          { label: "A", value: fmt(v.A) },
-          { label: "B", value: fmt(v.B) },
-          { label: "α (between)", value: fmt(v.alpha, 1) + "°" },
+          { label: "A", value: fmt(v.A), key: "A" },
+          { label: "B", value: fmt(v.B), key: "B" },
+          { label: "α (between)", value: fmt(v.alpha, 1) + "°", key: "alpha" },
           { label: "R (resultant)", value: fmt(c.R), hl: true },
           { label: "β (from A)", value: fmt(c.beta, 1) + "°", hl: true },
         ];

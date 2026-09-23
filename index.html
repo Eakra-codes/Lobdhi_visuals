@@ -84,13 +84,21 @@
       </div>
     </button>
 
-    <div class="chapter-card chapter-card--soon" aria-disabled="true">
+    <button class="chapter-card" id="chapterKinematics" data-chapter="kinematics">
+      <div class="chapter-card-glow"></div>
+      <div class="chapter-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
       <div class="chapter-card-body">
         <span class="chapter-index">CH.02</span>
         <h3>গতিবিদ্যা</h3>
-        <p>শীঘ্রই আসছে</p>
+        <span class="chapter-cta">Open simulations
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
       </div>
-    </div>
+    </button>
 
     <div class="chapter-card chapter-card--soon" aria-disabled="true">
       <div class="chapter-card-body">
@@ -135,7 +143,7 @@
       অধ্যায়সমূহ
     </button>
     <div class="lab-title">
-      <span class="eyebrow">অধ্যায় ০১ · ভেক্টর</span>
+      <span class="eyebrow" id="labChapterName">অধ্যায় ০১ · ভেক্টর</span>
       <h2 id="labTopicTitle">ভেক্টর পরিচিতি</h2>
     </div>
   </div>
@@ -211,6 +219,8 @@
 <script src="js/chapters/vector/09-dot-product.js"></script>
 <script src="js/chapters/vector/10-cross-product.js"></script>
 <script src="js/chapters/vector/11-rain-relative-velocity.js"></script>
+<script src="js/chapters/kinematics/index.js"></script>
+<script src="js/chapters/kinematics/01-motion-graphs.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

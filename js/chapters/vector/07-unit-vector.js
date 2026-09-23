@@ -46,7 +46,8 @@
       },
       readout(v, c) {
         return [
-          { label: "V, θ", value: `${fmt(v.V)}, ${fmt(v.theta, 1)}°` },
+          { label: "V", value: fmt(v.V), key: "V" },
+          { label: "θ", value: fmt(v.theta, 1) + "°", key: "theta" },
           { label: "V̂x", value: fmt(c.ux), hl: true },
           { label: "V̂y", value: fmt(c.uy), hl: true },
           { label: "|V̂|", value: "1.00" },

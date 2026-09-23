@@ -200,8 +200,8 @@ return [
       },
       readout(v, c) {
         return [
-          { label: "vᵣ (বৃষ্টি)", value: fmt(v.rainSpeed) },
-          { label: "vₘ (মানুষ)", value: fmt(v.manSpeed) },
+          { label: "vᵣ (বৃষ্টি)", value: fmt(v.rainSpeed), key: "rainSpeed" },
+          { label: "vₘ (মানুষ)", value: fmt(v.manSpeed), key: "manSpeed" },
           { label: "θ (ছাতার হেলা)", value: fmt(c.theta, 1) + "°", hl: true },
           { label: "|v_আপেক্ষিক|", value: fmt(c.rel), hl: true },
         ];
